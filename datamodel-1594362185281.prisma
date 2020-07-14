@@ -1,0 +1,22 @@
+type Author @db(name: "author") {
+  AuthorId: Int! @id
+  age: Int @db(name: "Age")
+  books: [Book]
+  name: String! @db(name: "Name")
+}
+
+type Book @db(name: "books") {
+  BookId: Int! @id
+  authorId: Author @db(name: "AuthorId")
+  description: String @db(name: "Description")
+  title: String! @db(name: "Title")
+}
+
+type User @db(name: "user") {
+  UserId: Int! @id
+  age: Int @db(name: "Age")
+  name: String! @db(name: "Name")
+  password: String @db(name: "Password")
+  role: String
+  userName: String! @db(name: "UserName") @unique
+}

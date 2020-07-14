@@ -1,0 +1,6 @@
+input BookInputType {
+    BookId:      Int
+    Description: String
+    Title:       String
+    author:      AuthorInputType
+  }

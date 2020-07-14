@@ -1,0 +1,8 @@
+type User {
+    Age:      Int,
+    Name:     String,
+    Password: String,
+    role:     String,
+    UserId:   Int,
+    UserName: String
+  }

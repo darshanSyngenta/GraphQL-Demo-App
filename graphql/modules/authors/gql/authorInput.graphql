@@ -1,0 +1,5 @@
+input AuthorInputType {
+    Age:      Int
+    AuthorId: Int
+    Name:     String
+  }

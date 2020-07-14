@@ -1,0 +1,8 @@
+type Book {
+    AuthorId:    Int,
+    BookId:      Int,
+    Description: String,
+    Title:       String,
+    author:      Author
+  
+  }
