@@ -1,17 +1,54 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
+  aws-s3: circleci/aws-s3@1.0.16
 jobs:
-  build-and-test:
+  build-and-deploy:
     executor:
       name: node/default
+    
+    working_directory: ~/repo
+
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: npm install
-            - run: npm test
+      - restore_cache:
+          key: v2-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Create Production build
+          command: |
+            echo $NPM_AUTH | base64 -d > ~/.npmrc
+            npm ci --cache .npm --prefer-offline --registry $STRIDER_NPM_REGISTRY
+            NODE_ENV=${CIRCLE_BRANCH}
+            npm install
+            npm run build
+            cp dist/index.html dist/200.html
+      - aws-s3/copy:
+          arguments: |
+            --recursive \
+            --include "*"
+          from: ~/repo/dist
+          to: s3://cropwise.base.web-client-${CIRCLE_BRANCH}
+          
+      - run:
+          name: Invalidate CloudFront Cache
+          command: |
+            CF_DISTRIBUTION="CF_DISTRIBUTION_${CIRCLE_BRANCH^^}"
+            aws cloudfront create-invalidation --distribution-id "${!CF_DISTRIBUTION}" --paths "/*"
+      - save_cache:
+          paths:
+            - node_modules
+            - .npm
+            - dist/
+          key: v2-dependencies-{{ checksum "package.json" }}
+
 workflows:
-    build-and-test:
+    build-and-deploy:
       jobs:
-        - build-and-test
+        - build-and-deploy:
+            filters:
+              branches:
+                only:
+                  - master
+                  - staging
+                  - qa
+                  - dev
